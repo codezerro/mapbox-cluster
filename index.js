@@ -1,7 +1,9 @@
 (async () => {
     //import dom
     const allTypeList = document.getElementById("school-lists");
+    const detailsView = document.getElementById("school-details");
     // variables
+    let currentClickDiv = null;
     const colors = ["#ef994d", "#2e994d", "#f27265", "#51bbd6", "#f28cb1"];
     const private = ["==", ["get", "TYPE_SPECIFIC"], "PRIVATE"];
     const archdiocese = ["==", ["get", "TYPE_SPECIFIC"], "ARCHDIOCESE"];
@@ -9,9 +11,7 @@
     const charter = ["==", ["get", "TYPE_SPECIFIC"], "CHARTER"];
     const contracted = ["==", ["get", "TYPE_SPECIFIC"], "CONTRACTED"];
 
-    // func
-
-    // code for creating an SVG donut chart from feature properties
+    // customClusterMarker func
     function customClusterMarker(props) {
         const counts = [
             props.private,
@@ -26,37 +26,13 @@
             total += count;
         }
 
-        console.log(total);
-
         let img = document.createElement("img");
         let html = document.createElement("div");
         img.classList.add("marker-image");
-        // console.log(props);
 
-        if (props.private > 0) {
-            html.classList.add("marker-cluster-group");
-            html.style.setProperty("--school-cluster-color", colors[0]);
-            img.src = "./assets/dollar-icon.svg";
-        } else if (props.archdiocese > 0) {
-            html.classList.add("marker-cluster-group");
-            html.style.setProperty("--school-cluster-color", colors[1]);
-            img.src = "./assets/archdiocese-icon.svg";
-        } else if (props.district > 0) {
-            html.classList.add("marker-cluster-group");
-            html.style.setProperty("--school-cluster-color", colors[2]);
-            img.src = "./assets/school-icon.svg";
-        } else if (props.charter > 0) {
-            html.classList.add("marker-cluster-group");
-            html.style.setProperty("--school-cluster-color", colors[3]);
-            img.src = "./assets/charter-icon.svg";
-        } else if (props.contracted > 0) {
-            html.classList.add("marker-cluster-group");
-            html.style.setProperty("--school-cluster-color", colors[4]);
-            img.src = "./assets/contact-icon.svg";
-        }
-        for (let i = 0; i < counts.length; i++) {
-            html.setAttribute("data-total", total);
-        }
+        html.classList.add("marker-cluster-group");
+        img.src = "./assets/book-icon.svg";
+        html.setAttribute("data-total", total);
 
         html.appendChild(img);
 
@@ -74,8 +50,8 @@
         zoom: 5,
         center: [-75.1634134086327, 40.0595120027579],
     });
-
-    map.addControl(new mapboxgl.NavigationControl());
+    // map control (zoom in/out)
+    map.addControl(new mapboxgl.NavigationControl(), "bottom-right");
 
     const res = await fetch("./Schools.geojson");
     const data = await res.json();
@@ -91,7 +67,8 @@
     //
 
     Object.entries(schoolTypes).forEach(([key, value], i) => {
-        const list = document.createElement("li");
+        const listItem = document.createElement("li");
+        const list = document.createElement("p");
         const span = document.createElement("span");
 
         if (key === "PRIVATE") {
@@ -116,7 +93,7 @@
             list.style.setProperty("--school-color", colors[i]);
             list.style.setProperty(
                 "--school-icon-url",
-                `url('./assets/school-icon.svg')`
+                `url('./assets/school-fav.svg')`
             );
         } else if (key === "CHARTER") {
             list.textContent = `${key}`;
@@ -136,72 +113,14 @@
             );
         }
 
-        list.appendChild(span);
+        listItem.appendChild(list);
+        listItem.appendChild(span);
 
-        allTypeList.children[0].appendChild(list);
+        allTypeList.children[0].appendChild(listItem);
     });
 
     // map on load
     map.on("load", () => {
-        console.log("====================================");
-        console.log(data);
-        console.log("====================================");
-        // create map marker
-        data.features.forEach((d, index) => {
-            const schoolCoord = d.geometry.coordinates;
-            const schoolType = d.properties.TYPE_SPECIFIC;
-            const div = document.createElement("div");
-
-            if (schoolType === "PRIVATE") {
-                div.classList.add("map-marker");
-                div.style.setProperty("--school-color", colors[0]);
-                div.style.setProperty(
-                    "--school-icon",
-                    `url('./assets/dollar-icon.svg')`
-                );
-            } else if (schoolType === "ARCHDIOCESE") {
-                div.classList.add("map-marker");
-                div.style.setProperty("--school-color", colors[1]);
-                div.style.setProperty(
-                    "--school-icon",
-                    `url('./assets/archdiocese-icon.svg')`
-                );
-            } else if (schoolType === "DISTRICT") {
-                div.classList.add("map-marker");
-                div.style.setProperty("--school-color", colors[2]);
-                div.style.setProperty(
-                    "--school-icon",
-                    `url('./assets/school-icon.svg')`
-                );
-            } else if (schoolType === "CHARTER") {
-                div.classList.add("map-marker");
-                div.style.setProperty("--school-color", colors[3]);
-                div.style.setProperty(
-                    "--school-icon",
-                    `url('./assets/charter-icon.svg')`
-                );
-            } else if (schoolType === "CONTRACTED") {
-                div.classList.add("map-marker");
-                div.style.setProperty("--school-color", colors[4]);
-                div.style.setProperty(
-                    "--school-icon",
-                    `url('./assets/contact-icon.svg')`
-                );
-            }
-
-            // onclick to fly
-            div.onclick = function () {
-                map.flyTo({
-                    center: schoolCoord,
-                    essential: true,
-                    zoom: 17,
-                    speed: 0.86,
-                });
-            };
-
-            new mapboxgl.Marker(div).setLngLat(schoolCoord).addTo(map);
-        });
-
         // add a clustered GeoJSON source for a sample set of school
         map.addSource("school-cluster", {
             type: "geojson",
@@ -209,7 +128,6 @@
             cluster: true,
             clusterRadius: 10,
             clusterProperties: {
-                // keep separate counts for each magnitude category in a cluster
                 private: ["+", ["case", private, 1, 0]],
                 archdiocese: ["+", ["case", archdiocese, 1, 0]],
                 district: ["+", ["case", district, 1, 0]],
@@ -224,7 +142,6 @@
             source: "school-cluster",
         });
 
-        // objects for caching and keeping track of HTML marker objects (for performance)
         const markers = {};
         let markersOnScreen = {};
 
@@ -232,11 +149,7 @@
             const newMarkers = {};
             const features = map.querySourceFeatures("school-cluster");
 
-            // for every cluster on the screen, create an HTML marker for it (if we didn't yet),
-            // and add it to the map if it's not there already
             for (const feature of features) {
-                // console.log("feature.properties ", feature);
-
                 const coords = feature.geometry.coordinates;
                 const props = feature.properties;
                 if (!props.cluster) continue;
@@ -253,14 +166,14 @@
 
                 if (!markersOnScreen[id]) marker.addTo(map);
             }
-            // for every marker we've added previously, remove those that are no longer visible
+
             for (const id in markersOnScreen) {
                 if (!newMarkers[id]) markersOnScreen[id].remove();
             }
             markersOnScreen = newMarkers;
         }
 
-        // after the GeoJSON data is loaded, update markers on the screen on every frame
+        // after load, its reander every frame
         map.on("render", () => {
             if (!map.isSourceLoaded("school-cluster")) return;
 
@@ -278,7 +191,97 @@
         }
 
         map.fitBounds(bounds, {
-            padding: 250,
+            padding: 300,
+        });
+        // create map marker
+        data.features.forEach((d, index) => {
+            const schoolCoord = d.geometry.coordinates;
+            const schoolType = d.properties.TYPE_SPECIFIC;
+            const MarkerDiv = document.createElement("div");
+
+            if (schoolType === "PRIVATE") {
+                MarkerDiv.classList.add("map-marker");
+                MarkerDiv.style.setProperty("--school-color", colors[0]);
+                MarkerDiv.style.setProperty(
+                    "--school-icon",
+                    `url('./assets/dollar-icon.svg')`
+                );
+            } else if (schoolType === "ARCHDIOCESE") {
+                MarkerDiv.classList.add("map-marker");
+                MarkerDiv.style.setProperty("--school-color", colors[1]);
+                MarkerDiv.style.setProperty(
+                    "--school-icon",
+                    `url('./assets/archdiocese-icon.svg')`
+                );
+            } else if (schoolType === "DISTRICT") {
+                MarkerDiv.classList.add("map-marker");
+                MarkerDiv.style.setProperty("--school-color", colors[2]);
+                MarkerDiv.style.setProperty(
+                    "--school-icon",
+                    `url('./assets/school-icon.svg')`
+                );
+            } else if (schoolType === "CHARTER") {
+                MarkerDiv.classList.add("map-marker");
+                MarkerDiv.style.setProperty("--school-color", colors[3]);
+                MarkerDiv.style.setProperty(
+                    "--school-icon",
+                    `url('./assets/charter-icon.svg')`
+                );
+            } else if (schoolType === "CONTRACTED") {
+                MarkerDiv.classList.add("map-marker");
+                MarkerDiv.style.setProperty("--school-color", colors[4]);
+                MarkerDiv.style.setProperty(
+                    "--school-icon",
+                    `url('./assets/contact-icon.svg')`
+                );
+            }
+
+            // onclick to fly
+            MarkerDiv.onclick = function () {
+                if (currentClickDiv != null) {
+                    currentClickDiv.style.border = "1px solid black";
+                }
+                // style border marker
+                MarkerDiv.style.border = "2px solid red";
+
+                map.flyTo({
+                    center: schoolCoord,
+                    essential: true,
+                    zoom: 15,
+                    speed: 0.8,
+                });
+
+                // show details
+                detailsView.style.transform = "translateX(-10px)";
+                // insert school informations
+                // school name
+                detailsView.children[0].textContent = `${d.properties.SCHOOL_NAME.toLowerCase()}`;
+                // school address
+                detailsView.children[1].children[1].textContent = `${
+                    d.properties.STREET_ADDRESS || "N/A"
+                }`;
+                // zip code
+                detailsView.children[2].children[1].textContent = `${
+                    d.properties.ZIP_CODE || "N/A"
+                }`;
+                // phone number
+                detailsView.children[3].children[1].textContent = `${
+                    d.properties.PHONE_NUMBER || "N/A"
+                }`;
+                // grade level
+                detailsView.children[4].children[1].textContent = `${
+                    d.properties.GRADE_LEVEL || "N/A"
+                }`;
+                // type
+                detailsView.children[5].children[1].textContent = `${
+                    d.properties.TYPE_SPECIFIC || "N/A"
+                }`;
+
+                // save last click div
+                currentClickDiv = MarkerDiv;
+            };
+
+            new mapboxgl.Marker(MarkerDiv).setLngLat(schoolCoord).addTo(map);
         });
     });
 })();
