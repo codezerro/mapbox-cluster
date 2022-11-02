@@ -2,4 +2,4 @@
 
 Mapbox Cluster example
 
-![](./assets/mapbox-cluster-demo.gif)
+![](./assets/ezgif.com-gif-maker.gif)
