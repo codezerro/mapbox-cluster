@@ -1,5 +1,5 @@
-# Mapbox cluster example with schools geojson data
+### Mapbox cluster with custom html marker example with school geojson data
 
-Mapbox Cluster example [Mapbox-cluster](https://harmonious-horse-607a85.netlify.app/)
+Link: [Mapbox-cluster-custom-html-marker](https://harmonious-horse-607a85.netlify.app/)
 
-![](./assets/ezgif.com-gif-maker.gif)
+![mapbox-cluster-demo.gif](./assets/mapbox-cluster-demo-2.gif)

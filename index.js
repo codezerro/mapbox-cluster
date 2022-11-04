@@ -64,8 +64,6 @@
         } else schoolTypes[school.properties.TYPE_SPECIFIC] += 1;
     });
 
-    //
-
     Object.entries(schoolTypes).forEach(([key, value], i) => {
         const listItem = document.createElement("li");
         const list = document.createElement("p");
@@ -126,7 +124,7 @@
             type: "geojson",
             data: data,
             cluster: true,
-            clusterRadius: 10,
+            clusterRadius: 19,
             clusterProperties: {
                 private: ["+", ["case", private, 1, 0]],
                 archdiocese: ["+", ["case", archdiocese, 1, 0]],

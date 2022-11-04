@@ -73,8 +73,8 @@ body {
 
 .map-marker {
     z-index: 10;
-    height: 25px;
-    width: 25px;
+    height: 16px;
+    width: 16px;
     border-radius: 50%;
     background: var(--school-color);
     text-align: center;
@@ -87,7 +87,7 @@ body {
     cursor: pointer;
     background-image: var(--school-icon);
     background-repeat: no-repeat;
-    background-size: 20px;
+    background-size: 12px;
     background-position: center;
 }
 
