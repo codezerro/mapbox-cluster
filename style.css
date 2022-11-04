@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Redressed&display=swap");
 body {
     margin: 0;
     padding: 0;
@@ -92,7 +93,6 @@ body {
 }
 
 /* custom marker cluster */
-
 .marker-cluster-group::before {
     content: attr(data-total);
     position: absolute;
@@ -157,7 +157,34 @@ body {
 }
 
 .school-details-name {
-    /* text-transform: uppercase; */
     margin-top: 10px;
     margin-bottom: 5px;
+}
+
+/* github link */
+.github-link {
+    position: absolute;
+    left: 50%;
+    top: 10px;
+    z-index: 30;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: translateX(-50%);
+    background: whitesmoke;
+    padding: 10px 15px;
+    box-shadow: 5px 5px 10px 5px #ccc;
+    border-radius: 10px;
+    cursor: pointer;
+}
+.github-link > img {
+    width: 20px;
+    height: 20px;
+}
+.github-link > a {
+    text-decoration: none;
+    margin-left: 10px;
+    color: black;
+    font-size: 16px;
+    font-weight: 500;
 }
